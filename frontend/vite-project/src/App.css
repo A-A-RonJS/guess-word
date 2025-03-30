@@ -41,7 +41,19 @@ html, body, #root {
 .header p {
   margin-top: 0.5rem;
   font-size: 1rem;
-  color: #666;
+  color: #666666;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.app-logo {
+  width: 40px;
+  height: 40px;
 }
 
 /* Main game area */
