@@ -1,0 +1,116 @@
+/* GuessRow.css */
+
+/* Full viewport reset and layout base */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+/* Apply border-box sizing to everything */
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* App wrapper */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header styles */
+.header {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.header p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #666666;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.app-logo {
+  width: 40px;
+  height: 40px;
+}
+
+/* Main game area */
+.game-area {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column; /* stacks the rows vertically */
+  align-items: center;     /* centres the rows horizontally */
+  gap: 1rem; 
+}
+
+/* ////////////////////////////////////////////////
+//////////////////// TILES ////////////////////////
+//////////////////////////////////////////////// */
+
+.guess-row {
+  display: grid;
+  grid-template-columns: repeat(5, 3rem);
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.tile {
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: white;
+}
+
+.tile.correct {
+  background-color: #6aaa64; /* green */
+  border-color: #6aaa64;
+  color: white;
+}
+
+.tile.present {
+  background-color: #c9b458; /* yellow */
+  border-color: #c9b458;
+  color: white;
+}
+
+.tile.absent {
+  background-color: #787c7e; /* grey */
+  border-color: #787c7e;
+  color: white;
+}
+
+.tile.empty {
+  background-color: white;
+  border-color: #ccc;
+  color: #ccc;
+}
