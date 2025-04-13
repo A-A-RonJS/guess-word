@@ -1,32 +1,13 @@
 import { useState } from "react";
-import "./GuessRow.css";
+import { scoreGuess } from "./utils/scoreGuess";
+import "./styles/GuessRow.css";
 import { GuessRow } from "./components/GuessRow";
 import logoUrl from "./assets/guess-word.svg";
 
-
 function App() {
-  // const guesses = [
-  //   [
-  //     { letter: "G", status: "correct" },
-  //     { letter: "U", status: "absent" },
-  //     { letter: "E", status: "absent" },
-  //     { letter: "S", status: "absent" },
-  //     { letter: "S", status: "present" },
-  //   ],
-  //   [
-  //     { letter: "T", status: "absent" },
-  //     { letter: "R", status: "present" },
-  //     { letter: "A", status: "absent" },
-  //     { letter: "I", status: "present" },
-  //     { letter: "N", status: "absent" },
-  //   ],
-  //   [], [], []
-  // ];
-
-  const [guesses, setGuesses] = useState
-  < 
+  const [guesses, setGuesses] = useState<
     // Type annotation for an array of arrays, where each inner array contains objects with a letter and status
-    { letter: string; status: string }[][]  
+    { letter: string; status: string }[][]
   >([]); // Initial value - zero guesses
 
   const [currentInput, setCurrentInput] = useState("");
@@ -38,7 +19,7 @@ function App() {
           <img src={logoUrl} alt="Guess Word logo" className="app-logo" />
           <h1>Guess Word</h1>
         </div>
-        <p>Let’s build something awesome 🧠</p>
+        <p>Hello World!</p>
       </header>
 
       <main className="game-area">
@@ -61,17 +42,16 @@ function App() {
   );
 
   function handleSubmit() {
+    const guess = currentInput.toUpperCase();
+    const correctWord = "GUESS";
+
     if (currentInput.length !== 5) {
       alert("Guess must be exactly 5 letters!");
       return;
     }
-  
-    const newGuess = currentInput.split("").map((letter) => ({
-      letter, //Same as letter: letter
-      status: "absent", // Temp placeholder while building
-    }));
-  
-    setGuesses([...guesses, newGuess]); // spread operator takes the list of guesses and adds newGuess to this list
+
+    const scored = scoreGuess(guess, correctWord);
+    setGuesses([...guesses, scored]); // spread operator takes the list of guesses and adds "scored" to this list
     setCurrentInput(""); // Clear the input box
   }
 }
