@@ -7,7 +7,6 @@ import { scoreGuess, buildInputTiles, buildEmptyTiles } from "./utils/tileUtils"
 import { GuessRow } from "./components/GuessRow";
 import { Keyboard } from "./components/Keyboard";
 
-
 // Assets
 import logoUrl from "./assets/guess-word.svg";
 
@@ -53,6 +52,9 @@ function App() {
   // Stores the correct word to guess - to be randomised
   const [correctWord] = useState("BRAIN");
 
+  // Core key processing logic.
+  // Note: This function closes over currentInput,
+  // so useEffect re-registers listener when currentInput changes.
   const processKey = (key: string) => {
     const isLetter = /^[a-z]$/i.test(key);
 
@@ -66,7 +68,8 @@ function App() {
   };
 
   useEffect(() => {
-    // Use latest processKey from closure
+    // This event listener uses the latest processKey and currentInput because
+    // useEffect depends on them and re-runs on every change.
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key;
       if (/^[a-zA-Z]$/.test(key)) {
@@ -82,7 +85,8 @@ function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [processKey, currentInput]);
 
-  // On-screen keyboard calls this stable function which calls processKey
+  // Stable function to pass to on-screen keyboard.
+  // Calls same processKey to keep behavior consistent.
   const handleOnScreenKeyPress = (key: string) => {
     processKey(key);
   };
@@ -146,12 +150,14 @@ function App() {
 
     const scored = scoreGuess(guess, correctWord);
     setGuesses([...guesses, scored]); // spread operator takes the list of guesses and adds "scored" to this list
-    setCurrentInput(""); // Clear the input box
+    setCurrentInput(""); // Clear the input
 
+    // Check if guess was correct
     if (winningWordCheck(scored)) {
       setGameStatus("won");
     } else if (guesses.length + 1 === MAX_GUESSES) { //  React does not immediately update the state, so guesses.length does not get added to until handleSubmit() finishes,
       // hence why this logic works.
+      // In other words, React state updates are async, so using guesses.length + 1 is correct here
       setGameStatus("lost");
     }
 
