@@ -1,0 +1,36 @@
+.keyboard-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  align-self: center;
+}
+
+.key {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0.75rem 0.5rem;
+  background-color: #ddd;
+  border-radius: 0.3rem;
+
+  font-weight: bold;
+  text-transform: uppercase;
+
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  box-sizing: border-box;
+}

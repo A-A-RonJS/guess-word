@@ -1,5 +1,7 @@
 /* Full viewport reset and layout base */
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -11,7 +13,9 @@ html, body, #root {
 }
 
 /* Apply border-box sizing to everything */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
 }
 
@@ -20,6 +24,7 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #f8f9fa;
 }
 
 /* Header styles */
@@ -56,11 +61,12 @@ html, body, #root {
 
 /* Main game area */
 .game-area {
-  flex: 1;
-  padding: 2rem;
+  padding: 2rem 2rem 1rem;
   display: flex;
-  flex-direction: column; /* stacks the rows vertically */
-  align-items: center;     /* centres the rows horizontally */
+  flex-direction: column;
+  /* stacks the rows vertically */
+  align-items: center;
+  /* centres the rows horizontally */
   /* gap: 1rem;  */
 }
 
@@ -90,19 +96,22 @@ html, body, #root {
 }
 
 .tile.correct {
-  background-color: #6aaa64; /* green */
+  background-color: #6aaa64;
+  /* green */
   border-color: #6aaa64;
   color: white;
 }
 
 .tile.present {
-  background-color: #c9b458; /* yellow */
+  background-color: #c9b458;
+  /* yellow */
   border-color: #c9b458;
   color: white;
 }
 
 .tile.absent {
-  background-color: #787c7e; /* grey */
+  background-color: #787c7e;
+  /* grey */
   border-color: #787c7e;
   color: white;
 }

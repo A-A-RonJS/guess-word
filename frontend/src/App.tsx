@@ -5,12 +5,14 @@ import { scoreGuess, buildInputTiles, buildEmptyTiles } from "./utils/tileUtils"
 
 // Components
 import { GuessRow } from "./components/GuessRow";
+import { Keyboard } from "./components/Keyboard";
+
 
 // Assets
 import logoUrl from "./assets/guess-word.svg";
 
 // Styles
-import "./styles/GuessRow.css";
+import "./styles/App.css";
 import "./styles/GameOver.css";
 
 const MAX_GUESSES = 6;
@@ -30,7 +32,7 @@ function App() {
   const [currentInput, setCurrentInput] = useState("");
 
   // Stores the correct word to guess - to be randomised
-  const [correctWord] = useState("TIRED");
+  const [correctWord] = useState("BRAIN");
 
   // A reference to the input element, used for managing focus
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +41,7 @@ function App() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-  
+
 
   let gameOverMessage = "";
 
@@ -76,6 +78,11 @@ function App() {
         })}
       </main>
 
+
+      <Keyboard onKeyPress={handleKeyPress} />
+
+
+
       <section className="input-area">
         <input
           ref={inputRef}
@@ -92,6 +99,10 @@ function App() {
       </section>
     </div>
   );
+
+  function handleKeyPress(key: string) {
+    console.log("Pressed: ", key);
+  }
 
   function handleSubmit() {
 
