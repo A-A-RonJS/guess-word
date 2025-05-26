@@ -53,13 +53,39 @@ function App() {
   // Stores the correct word to guess - to be randomised
   const [correctWord] = useState("BRAIN");
 
-  // A reference to the input element, used for managing focus
-  const inputRef = useRef<HTMLInputElement>(null);
+  const processKey = (key: string) => {
+    const isLetter = /^[a-z]$/i.test(key);
 
-  // On first render (component mount), focus the input field so the player can start typing right away
+    if (isLetter && currentInput.length < 5) {
+      setCurrentInput(currentInput + key);
+    } else if (key === "⌫" && currentInput.length > 0) {
+      setCurrentInput(currentInput.slice(0, -1));
+    } else if (key === "Enter") {
+      handleSubmit();
+    }
+  };
+
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+    // Use latest processKey from closure
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key;
+      if (/^[a-zA-Z]$/.test(key)) {
+        processKey(key.toUpperCase());
+      } else if (key === "Backspace") {
+        processKey("⌫");
+      } else if (key === "Enter") {
+        processKey("Enter");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [processKey, currentInput]);
+
+  // On-screen keyboard calls this stable function which calls processKey
+  const handleOnScreenKeyPress = (key: string) => {
+    processKey(key);
+  };
 
   let gameOverMessage = "";
 
@@ -100,42 +126,9 @@ function App() {
           }
         })}
       </main>
-
-      <Keyboard onKeyPress={handleKeyPress} />
-
-      <section className="input-area">
-        <input
-          ref={inputRef}
-          type="text"
-          maxLength={5}
-          value={currentInput}
-          onChange={(e) => setCurrentInput(e.target.value.toUpperCase())}
-          placeholder="Enter a 5-letter word"
-          disabled={gameStatus !== "playing"}
-        />
-        <button onClick={handleSubmit} disabled={gameStatus !== "playing"}>
-          Submit
-        </button>
-      </section>
+      <Keyboard onKeyPress={handleOnScreenKeyPress} />
     </div>
   );
-
-  function handleKeyPress(key: string) {
-    // Checks if single letter, case insensitive
-    const isLetter = /^[a-z]$/i.test(key);
-
-    if (isLetter && currentInput.length < 5) {
-      setCurrentInput(currentInput + key)
-    }
-
-    if (key === "⌫" && currentInput.length > 0) {
-      setCurrentInput(currentInput.slice(0, -1))
-    }
-
-    if (key === "Enter") {
-      handleSubmit()
-    }
-  }
 
   function handleSubmit() {
 
