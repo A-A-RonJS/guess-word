@@ -7,7 +7,7 @@ type KeyboardProps = {
 const keyboardRows = [
   ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
   ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-  ["Enter", "Z", "X", "C", "V", "B", "N", "M", "←"],
+  ["Enter", "Z", "X", "C", "V", "B", "N", "M", "⌫"],
 ];
 
 export function Keyboard({ onKeyPress }: KeyboardProps) {
@@ -23,8 +23,11 @@ export function Keyboard({ onKeyPress }: KeyboardProps) {
                   key={key}
                   onClick={() => onKeyPress(key)}
                   style={{
-                    flexGrow: key === "Enter" || key === "←" ? 1.5 : 1,
-                    fontSize: key === "Enter" ? "0.6rem" : "1rem",
+                    flexGrow: key === "Enter" || key === "⌫" ? 1.5 : 1,
+                    fontSize: key === "Enter" ? "0.6rem" : key === "⌫"
+                      ? "0.7rem"
+                      : "1rem",
+
                   }}
                 >
                   {key}

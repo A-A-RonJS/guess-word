@@ -13,9 +13,11 @@ import logoUrl from "./assets/guess-word.svg";
 
 // Styles
 import "./styles/App.css";
-import "./styles/GameOver.css";
+import "./styles/GameFeedback.css";
 
 const MAX_GUESSES = 6;
+
+type FeedbackType = "tooFewChars" | "noGuessesLeft" | "none";
 
 function App() {
   // {}[][]Type annotation for an array of arrays of objects,
@@ -31,6 +33,23 @@ function App() {
   // Stores the user's current input
   const [currentInput, setCurrentInput] = useState("");
 
+  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
+
+  // Determines which feedback message will be displayed
+  const [feedbackMessage, setFeedbackMessage] = useState<FeedbackType>("none");
+
+  function showFeedback(message: FeedbackType) {
+    setFeedbackMessage(message);
+    setIsFeedbackVisible(true);
+
+    setTimeout(() => {
+      setIsFeedbackVisible(false);
+
+      // Give fade-out time to complete before clearing message
+      setTimeout(() => setFeedbackMessage("none"), 600);
+    }, 3000);
+  }
+
   // Stores the correct word to guess - to be randomised
   const [correctWord] = useState("BRAIN");
 
@@ -41,7 +60,6 @@ function App() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
 
   let gameOverMessage = "";
 
@@ -66,6 +84,11 @@ function App() {
         </div>
       )}
 
+      <div className={`feedback-banner ${feedbackMessage !== "none" ? "visible" : "hidden"}`}>
+        {feedbackMessage === "tooFewChars" && "⚠️ Guess must be exactly 5 letters!"}
+        {feedbackMessage === "noGuessesLeft" && "❌ No more guesses left!"}
+      </div>
+
       <main className="game-area">
         {Array.from({ length: MAX_GUESSES }, (_, i) => {
           if (i < guesses.length) {
@@ -78,10 +101,7 @@ function App() {
         })}
       </main>
 
-
       <Keyboard onKeyPress={handleKeyPress} />
-
-
 
       <section className="input-area">
         <input
@@ -101,20 +121,33 @@ function App() {
   );
 
   function handleKeyPress(key: string) {
-    console.log("Pressed: ", key);
+    // Checks if single letter, case insensitive
+    const isLetter = /^[a-z]$/i.test(key);
+
+    if (isLetter && currentInput.length < 5) {
+      setCurrentInput(currentInput + key)
+    }
+
+    if (key === "⌫" && currentInput.length > 0) {
+      setCurrentInput(currentInput.slice(0, -1))
+    }
+
+    if (key === "Enter") {
+      handleSubmit()
+    }
   }
 
   function handleSubmit() {
 
     if (guesses.length >= 6) {
-      alert("No more guesses left!");
+      showFeedback("noGuessesLeft");
       return;
     }
 
     const guess = currentInput.toUpperCase();
 
     if (currentInput.length !== 5) {
-      alert("Guess must be exactly 5 letters!");
+      showFeedback("tooFewChars");
       return;
     }
 
