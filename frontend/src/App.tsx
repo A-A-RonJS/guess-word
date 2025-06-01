@@ -29,6 +29,37 @@ function App() {
   // Tracks the current game status: whether the player is still playing, has won, or has lost 
   const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">("playing");
 
+  const [letterStatuses, setLetterStatuses] = useState<Record<string, string>>({});
+
+  const statusPriority: Record<string, number> = {
+    correct: 3,
+    present: 2,
+    absent: 1,
+    pending: 0,
+  };
+
+  function aggregateLetterStatuses(
+    guesses: { letter: string; status: string }[][]
+  ) {
+    const aggregated: Record<string, string> = {};
+
+    for (const guess of guesses) {
+      for (const tile of guess) {
+        const letter = tile.letter.toUpperCase();
+        const status = tile.status;
+
+        if (!aggregated[letter]) {
+          aggregated[letter] = status;
+        } else {
+          if (statusPriority[status] > statusPriority[aggregated[letter]]) {
+            aggregated[letter] = status;
+          }
+        }
+      }
+    }
+    return aggregated;
+  }
+
   // Stores the user's current input
   const [currentInput, setCurrentInput] = useState("");
 
@@ -130,7 +161,7 @@ function App() {
           }
         })}
       </main>
-      <Keyboard onKeyPress={handleOnScreenKeyPress} />
+      <Keyboard onKeyPress={handleOnScreenKeyPress} letterStatuses={letterStatuses} />
     </div>
   );
 
@@ -149,7 +180,15 @@ function App() {
     }
 
     const scored = scoreGuess(guess, correctWord);
+
+    const newGuesses = [...guesses, scored];
+
     setGuesses([...guesses, scored]); // spread operator takes the list of guesses and adds "scored" to this list
+
+    // Update letter statuses state using the aggregator function with new guesses
+    const newLetterStatuses = aggregateLetterStatuses(newGuesses);
+    setLetterStatuses(newLetterStatuses);
+
     setCurrentInput(""); // Clear the input
 
     // Check if guess was correct
