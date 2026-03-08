@@ -27,10 +27,12 @@ export function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) {
                   tabIndex={0}
                   style={{
                     flexGrow: key === "Enter" || key === "⌫" ? 1.5 : 1,
-                    fontSize: key === "Enter" ? "0.6rem" : key === "⌫"
-                      ? "0.7rem"
-                      : "1rem",
-
+                    fontSize:
+                      key === "Enter"
+                        ? "0.6rem"
+                        : key === "⌫"
+                          ? "0.7rem"
+                          : "1rem",
                   }}
                   onKeyDown={(e) => {
                     if (e.key === " ") {
@@ -41,12 +43,11 @@ export function Keyboard({ onKeyPress, letterStatuses }: KeyboardProps) {
                 >
                   {key}
                 </div>
-              )
+              );
             })}
           </div>
         );
-      })
-      }
+      })}
     </section>
   );
 }

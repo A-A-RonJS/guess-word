@@ -1,24 +1,25 @@
 import { useState, useEffect, useCallback } from "react";
+
 import { ANSWERS } from "./data/answerWordList";
 import { VALID_GUESSES } from "./data/validGuessesWordList";
-
 // Logic & helpers
-import { scoreGuess, buildInputTiles, buildEmptyTiles } from "./utils/tileUtils";
-
+import {
+  scoreGuess,
+  buildInputTiles,
+  buildEmptyTiles,
+} from "./utils/tileUtils";
 // Components
 import { GuessRow } from "./components/GuessRow";
 import { Keyboard } from "./components/Keyboard";
-
 // Assets
 import logoUrl from "./assets/guess-word.svg";
-
 // Styles
 import "./styles/App.css";
 import "./styles/GameFeedback.css";
 
 const MAX_GUESSES = 6;
 
-type FeedbackType = "tooFewChars" | "invalidWord" |"none";
+type FeedbackType = "tooFewChars" | "invalidWord" | "none";
 
 const statusPriority: Record<string, number> = {
   correct: 3,
@@ -27,7 +28,9 @@ const statusPriority: Record<string, number> = {
   pending: 0,
 };
 
-function aggregateLetterStatuses(guesses: { letter: string; status: string }[][]) {
+function aggregateLetterStatuses(
+  guesses: { letter: string; status: string }[][]
+) {
   const aggregated: Record<string, string> = {};
 
   for (const guess of guesses) {
@@ -47,8 +50,8 @@ function aggregateLetterStatuses(guesses: { letter: string; status: string }[][]
   return aggregated;
 }
 
-function winningWordCheck(scoredGuess: { letter: string, status: string }[]) {
-  return scoredGuess.every(tile => tile.status === "correct")
+function winningWordCheck(scoredGuess: { letter: string; status: string }[]) {
+  return scoredGuess.every((tile) => tile.status === "correct");
 }
 
 function App() {
@@ -56,13 +59,19 @@ function App() {
   // where each object has letter and status properties
   // Starting state is an empty array
   // Stores all previous guesses as arrays of tiles (e.g. [[{letter: "T", status: "present"}, ...]])
-  const [guesses, setGuesses] = useState<{ letter: string; status: string }[][]>([]);
+  const [guesses, setGuesses] = useState<
+    { letter: string; status: string }[][]
+  >([]);
 
   // useState<..>(..) = <what it will store>(what the initial value is)
-  // Tracks the current game status: whether the player is still playing, has won, or has lost 
-  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">("playing");
+  // Tracks the current game status: whether the player is still playing, has won, or has lost
+  const [gameStatus, setGameStatus] = useState<"playing" | "won" | "lost">(
+    "playing"
+  );
 
-  const [letterStatuses, setLetterStatuses] = useState<Record<string, string>>({});
+  const [letterStatuses, setLetterStatuses] = useState<Record<string, string>>(
+    {}
+  );
 
   // Stores the user's current input
   const [currentInput, setCurrentInput] = useState("");
@@ -112,31 +121,34 @@ function App() {
     // Check if guess was correct
     if (winningWordCheck(scored)) {
       setGameStatus("won");
-    } else if (guesses.length + 1 === MAX_GUESSES) { //  React does not immediately update the state, so guesses.length does not get added to until handleSubmit() finishes,
+    } else if (guesses.length + 1 === MAX_GUESSES) {
+      //  React does not immediately update the state, so guesses.length does not get added to until handleSubmit() finishes,
       // hence why this logic works.
       // In other words, React state updates are async, so using guesses.length + 1 is correct here
       setGameStatus("lost");
     }
-
   }, [currentInput, correctWord, guesses]);
 
   // Core key processing logic.
   // Note: This function closes over currentInput,
   // so useEffect re-registers listener when currentInput changes.
   // processKey function is defined inside App function meaning it captures a reference to the variables outside and uses them
-  const processKey = useCallback((key: string) =>  {
-    if (gameStatus !== "playing") return;
+  const processKey = useCallback(
+    (key: string) => {
+      if (gameStatus !== "playing") return;
 
-    const isLetter = /^[a-z]$/i.test(key);
+      const isLetter = /^[a-z]$/i.test(key);
 
-    if (isLetter && currentInput.length < 5) {
-      setCurrentInput(currentInput + key);
-    } else if (key === "⌫" && currentInput.length > 0) {
-      setCurrentInput(currentInput.slice(0, -1));
-    } else if (key === "Enter") {
-      handleSubmit();
-    }
-  }, [currentInput, gameStatus, handleSubmit]);
+      if (isLetter && currentInput.length < 5) {
+        setCurrentInput(currentInput + key);
+      } else if (key === "⌫" && currentInput.length > 0) {
+        setCurrentInput(currentInput.slice(0, -1));
+      } else if (key === "Enter") {
+        handleSubmit();
+      }
+    },
+    [currentInput, gameStatus, handleSubmit]
+  );
 
   useEffect(() => {
     // This event listener uses the latest processKey and currentInput because
@@ -180,13 +192,14 @@ function App() {
       </header>
 
       {gameStatus !== "playing" && (
-        <div className="game-over-message">
-          {gameOverMessage}
-        </div>
+        <div className="game-over-message">{gameOverMessage}</div>
       )}
 
-      <div className={`feedback-banner ${feedbackMessage !== "none" ? "visible" : "hidden"}`}>
-        {feedbackMessage === "tooFewChars" && "⚠️ Guess must be exactly 5 letters!"}
+      <div
+        className={`feedback-banner ${feedbackMessage !== "none" ? "visible" : "hidden"}`}
+      >
+        {feedbackMessage === "tooFewChars" &&
+          "⚠️ Guess must be exactly 5 letters!"}
         {feedbackMessage === "invalidWord" && "❌ Not a valid word!"}
       </div>
 
@@ -202,7 +215,10 @@ function App() {
           }
         })}
       </main>
-      <Keyboard onKeyPress={handleOnScreenKeyPress} letterStatuses={letterStatuses} />
+      <Keyboard
+        onKeyPress={handleOnScreenKeyPress}
+        letterStatuses={letterStatuses}
+      />
     </div>
   );
 }
