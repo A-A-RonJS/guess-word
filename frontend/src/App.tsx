@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { ANSWERS } from "./data/answerWordList";
+import { VALID_GUESSES } from "./data/validGuessesWordList";
 
 // Logic & helpers
 import { scoreGuess, buildInputTiles, buildEmptyTiles } from "./utils/tileUtils";
@@ -16,7 +18,38 @@ import "./styles/GameFeedback.css";
 
 const MAX_GUESSES = 6;
 
-type FeedbackType = "tooFewChars" | "noGuessesLeft" | "none";
+type FeedbackType = "tooFewChars" | "invalidWord" |"none";
+
+const statusPriority: Record<string, number> = {
+  correct: 3,
+  present: 2,
+  absent: 1,
+  pending: 0,
+};
+
+function aggregateLetterStatuses(guesses: { letter: string; status: string }[][]) {
+  const aggregated: Record<string, string> = {};
+
+  for (const guess of guesses) {
+    for (const tile of guess) {
+      const letter = tile.letter.toUpperCase();
+      const status = tile.status;
+
+      if (!aggregated[letter]) {
+        aggregated[letter] = status;
+      } else {
+        if (statusPriority[status] > statusPriority[aggregated[letter]]) {
+          aggregated[letter] = status;
+        }
+      }
+    }
+  }
+  return aggregated;
+}
+
+function winningWordCheck(scoredGuess: { letter: string, status: string }[]) {
+  return scoredGuess.every(tile => tile.status === "correct")
+}
 
 function App() {
   // {}[][]Type annotation for an array of arrays of objects,
@@ -31,62 +64,69 @@ function App() {
 
   const [letterStatuses, setLetterStatuses] = useState<Record<string, string>>({});
 
-  const statusPriority: Record<string, number> = {
-    correct: 3,
-    present: 2,
-    absent: 1,
-    pending: 0,
-  };
-
-  function aggregateLetterStatuses(
-    guesses: { letter: string; status: string }[][]
-  ) {
-    const aggregated: Record<string, string> = {};
-
-    for (const guess of guesses) {
-      for (const tile of guess) {
-        const letter = tile.letter.toUpperCase();
-        const status = tile.status;
-
-        if (!aggregated[letter]) {
-          aggregated[letter] = status;
-        } else {
-          if (statusPriority[status] > statusPriority[aggregated[letter]]) {
-            aggregated[letter] = status;
-          }
-        }
-      }
-    }
-    return aggregated;
-  }
-
   // Stores the user's current input
   const [currentInput, setCurrentInput] = useState("");
-
-  const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
 
   // Determines which feedback message will be displayed
   const [feedbackMessage, setFeedbackMessage] = useState<FeedbackType>("none");
 
   function showFeedback(message: FeedbackType) {
     setFeedbackMessage(message);
-    setIsFeedbackVisible(true);
-
-    setTimeout(() => {
-      setIsFeedbackVisible(false);
-
-      // Give fade-out time to complete before clearing message
-      setTimeout(() => setFeedbackMessage("none"), 600);
-    }, 3000);
+    setTimeout(() => setFeedbackMessage("none"), 3600);
   }
 
-  // Stores the correct word to guess - to be randomised
-  const [correctWord] = useState("BRAIN");
+  const [correctWord] = useState(() =>
+    ANSWERS[Math.floor(Math.random() * ANSWERS.length)].toUpperCase()
+  );
+
+  const handleSubmit = useCallback(() => {
+    const guess = currentInput.toUpperCase();
+
+    if (currentInput.length !== 5) {
+      showFeedback("tooFewChars");
+      return;
+    }
+
+    const guessLower = guess.toLowerCase();
+    if (!ANSWERS.includes(guessLower) && !VALID_GUESSES.includes(guessLower)) {
+      showFeedback("invalidWord");
+      return;
+    }
+
+    const scored = scoreGuess(guess, correctWord);
+    // spread instead of push as state must be immutable. .push mutates existing array
+    // spread operator creates a new array with all the existing guesses plus the new one, which React sees as new value and re-renders
+    const newGuesses = [...guesses, scored];
+
+    // newGuesses is stored due to setGuesses being asynchronous so it schedules state update but doesn't apply immediately
+    // so the guesses variables still refers to the old array for the rest of function execution
+    // newGuesses holds the new status and can then be used
+    setGuesses([...guesses, scored]); // spread operator takes the list of guesses and adds "scored" to this list
+
+    // Update letter statuses state using the aggregator function with new guesses
+    const newLetterStatuses = aggregateLetterStatuses(newGuesses);
+    setLetterStatuses(newLetterStatuses);
+
+    setCurrentInput(""); // Clear the input
+
+    // Check if guess was correct
+    if (winningWordCheck(scored)) {
+      setGameStatus("won");
+    } else if (guesses.length + 1 === MAX_GUESSES) { //  React does not immediately update the state, so guesses.length does not get added to until handleSubmit() finishes,
+      // hence why this logic works.
+      // In other words, React state updates are async, so using guesses.length + 1 is correct here
+      setGameStatus("lost");
+    }
+
+  }, [currentInput, correctWord, guesses]);
 
   // Core key processing logic.
   // Note: This function closes over currentInput,
   // so useEffect re-registers listener when currentInput changes.
-  const processKey = (key: string) => {
+  // processKey function is defined inside App function meaning it captures a reference to the variables outside and uses them
+  const processKey = useCallback((key: string) =>  {
+    if (gameStatus !== "playing") return;
+
     const isLetter = /^[a-z]$/i.test(key);
 
     if (isLetter && currentInput.length < 5) {
@@ -96,7 +136,7 @@ function App() {
     } else if (key === "Enter") {
       handleSubmit();
     }
-  };
+  }, [currentInput, gameStatus, handleSubmit]);
 
   useEffect(() => {
     // This event listener uses the latest processKey and currentInput because
@@ -147,64 +187,23 @@ function App() {
 
       <div className={`feedback-banner ${feedbackMessage !== "none" ? "visible" : "hidden"}`}>
         {feedbackMessage === "tooFewChars" && "⚠️ Guess must be exactly 5 letters!"}
-        {feedbackMessage === "noGuessesLeft" && "❌ No more guesses left!"}
+        {feedbackMessage === "invalidWord" && "❌ Not a valid word!"}
       </div>
 
       <main className="game-area">
+        {/* Max guesses = 6 - generates completed rows, active typing row, empty rows*/}
         {Array.from({ length: MAX_GUESSES }, (_, i) => {
           if (i < guesses.length) {
             return <GuessRow guess={guesses[i]} key={i} />;
           } else if (i === guesses.length && gameStatus === "playing") {
             return <GuessRow guess={buildInputTiles(currentInput)} key={i} />;
           } else {
-            return <GuessRow guess={buildEmptyTiles()} />;
+            return <GuessRow guess={buildEmptyTiles()} key={i} />;
           }
         })}
       </main>
       <Keyboard onKeyPress={handleOnScreenKeyPress} letterStatuses={letterStatuses} />
     </div>
   );
-
-  function handleSubmit() {
-
-    if (guesses.length >= 6) {
-      showFeedback("noGuessesLeft");
-      return;
-    }
-
-    const guess = currentInput.toUpperCase();
-
-    if (currentInput.length !== 5) {
-      showFeedback("tooFewChars");
-      return;
-    }
-
-    const scored = scoreGuess(guess, correctWord);
-
-    const newGuesses = [...guesses, scored];
-
-    setGuesses([...guesses, scored]); // spread operator takes the list of guesses and adds "scored" to this list
-
-    // Update letter statuses state using the aggregator function with new guesses
-    const newLetterStatuses = aggregateLetterStatuses(newGuesses);
-    setLetterStatuses(newLetterStatuses);
-
-    setCurrentInput(""); // Clear the input
-
-    // Check if guess was correct
-    if (winningWordCheck(scored)) {
-      setGameStatus("won");
-    } else if (guesses.length + 1 === MAX_GUESSES) { //  React does not immediately update the state, so guesses.length does not get added to until handleSubmit() finishes,
-      // hence why this logic works.
-      // In other words, React state updates are async, so using guesses.length + 1 is correct here
-      setGameStatus("lost");
-    }
-
-  }
-
-  function winningWordCheck(scoredGuess: { letter: string, status: string }[]) {
-    return scoredGuess.every(tile => tile.status === "correct")
-  }
-
 }
 export default App;
