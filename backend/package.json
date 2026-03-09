@@ -1,0 +1,32 @@
+{
+  "name": "guess-word-backend",
+  "version": "1.0.0",
+  "description": "Guess Word backend API",
+  "homepage": "https://github.com/A-A-RonJS/guess-word#readme",
+  "bugs": {
+    "url": "https://github.com/A-A-RonJS/guess-word/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/A-A-RonJS/guess-word.git"
+  },
+  "license": "ISC",
+  "author": "Aaron Scott",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
