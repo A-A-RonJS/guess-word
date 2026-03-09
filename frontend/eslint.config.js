@@ -25,7 +25,7 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      'import/order': ['warn', {     // 👈 add this
+      'import/order': ['warn', {
         'groups': [
           'builtin',
           'external',
