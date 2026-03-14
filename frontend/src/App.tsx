@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 
-import { ANSWERS } from "./data/answerWordList";
 import { VALID_GUESSES } from "./data/validGuessesWordList";
 // Logic & helpers
 import {
