@@ -21,7 +21,7 @@ for word in words:
     i += 1
     
 # Write to new sql file
-with open("seed.sql", "w") as file:
+with open("../supabase/seed.sql", "w") as file:
     file.write("INSERT INTO daily_words (word, date) \nVALUES\n")
     for i in range(len(word_date_pairs)):
       word, word_date = word_date_pairs[i]

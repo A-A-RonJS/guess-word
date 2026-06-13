@@ -3,3 +3,5 @@ CREATE TABLE IF NOT EXISTS daily_words (
   word VARCHAR(5) NOT NULL,
   date DATE NOT NULL UNIQUE
 );
+
+GRANT SELECT ON daily_words TO service_role;
