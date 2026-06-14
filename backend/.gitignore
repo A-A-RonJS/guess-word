@@ -27,3 +27,4 @@ dist
 # Generated scripts
 scripts/seed.sql
 supabase/seed.sql
+src/types/database.types.ts

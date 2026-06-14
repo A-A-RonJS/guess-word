@@ -9,10 +9,10 @@ describe("formattedDate", () => {
     expect(result).toBe("2026-01-01");
   });
 
-  it("formats double digit date to YYYY-MM-DD", () => {
-    const date = new Date("January 11, 2026");
+  it("formats double digit day and month to YYYY-MM-DD", () => {
+    const date = new Date("November 11, 2026");
     const result = formattedDate(date);
     console.log(`Formatted date: ${result}`);
-    expect(result).toBe("2026-01-11");
+    expect(result).toBe("2026-11-11");
   });
 });
