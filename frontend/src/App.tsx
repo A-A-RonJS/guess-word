@@ -53,6 +53,16 @@ function winningWordCheck(scoredGuess: { letter: string; status: string }[]) {
   return scoredGuess.every((tile) => tile.status === "correct");
 }
 
+interface DailyWordResponse {
+  word: string;
+}
+
+function getDailyWord(): Promise<DailyWordResponse> {
+  return fetch("http://localhost:3000/game/daily-word").then(
+    (res) => res.json() as Promise<DailyWordResponse>
+  );
+}
+
 function App() {
   // {}[][]Type annotation for an array of arrays of objects,
   // where each object has letter and status properties
@@ -77,15 +87,13 @@ function App() {
 
   // Determines which feedback message will be displayed
   const [feedbackMessage, setFeedbackMessage] = useState<FeedbackType>("none");
+  const [correctWord, setCorrectWord] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   function showFeedback(message: FeedbackType) {
     setFeedbackMessage(message);
     setTimeout(() => setFeedbackMessage("none"), 3600);
   }
-
-  const [correctWord] = useState(() =>
-    ANSWERS[Math.floor(Math.random() * ANSWERS.length)].toUpperCase()
-  );
 
   const handleSubmit = useCallback(() => {
     const guess = currentInput.toUpperCase();
@@ -96,7 +104,7 @@ function App() {
     }
 
     const guessLower = guess.toLowerCase();
-    if (!ANSWERS.includes(guessLower) && !VALID_GUESSES.includes(guessLower)) {
+    if (!VALID_GUESSES.includes(guessLower)) {
       showFeedback("invalidWord");
       return;
     }
@@ -150,6 +158,13 @@ function App() {
   );
 
   useEffect(() => {
+    getDailyWord().then((data) => {
+      setCorrectWord(data.word.toUpperCase());
+      setIsLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
     // This event listener uses the latest processKey and currentInput because
     // useEffect depends on them and re-runs on every change.
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -180,6 +195,8 @@ function App() {
   } else if (gameStatus === "lost") {
     gameOverMessage = `😢 You lost. The word was ${correctWord}.`;
   }
+
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div className="app-container">

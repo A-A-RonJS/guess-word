@@ -1,9 +1,11 @@
+import cors from "cors";
 import type { Request, Response } from "express";
 import express from "express";
 import { getSupabaseClient } from "./database/supabaseClient.js";
 import { formattedDate } from "./utils/dateUtils.js";
 
 export const app = express();
+app.use(cors());
 const supabaseClient = getSupabaseClient();
 
 app.get("/health", (req: Request, res: Response) => {
